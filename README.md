@@ -45,7 +45,7 @@ line to swap a model — e.g. if you hit Opus limits on Pro, set the evaluator t
 
 1. Open a terminal in this folder:
    ```bash
-   cd ~/Desktop/Workspace/vimarsh-skill
+   cd vimarsh-skill
    claude
    ```
 2. Point Claude at your answer/essay, e.g.:
@@ -54,7 +54,7 @@ line to swap a model — e.g. if you hit Opus limits on Pro, set the evaluator t
    **Tip:** put the PDF/image inside this folder first (e.g. drop it in the
    project root or an `inputs/` subfolder) and refer to it by that path. Claude
    Code sandboxes file access to the folder you launched it from, so a file
-   sitting elsewhere (like `~/Desktop`) may be blocked or prompt for approval.
+   sitting elsewhere may be blocked or prompt for approval.
 
    (or just say **"use the vimarsh skill"**). The skill triggers and asks you
    three questions:

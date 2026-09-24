@@ -1,115 +1,65 @@
-# Vimarsh (skill) — UPSC/GPSC answer & essay evaluator
+# Vimarsh — UPSC/GPSC answer and essay feedback
 
-A **Claude Code skill** that evaluates a handwritten UPSC/GPSC mains **answer**
-or **essay** — in Gujarati or English. It transcribes your uploaded PDF/image,
-optionally researches reference material on the web, scores it against the right
-rubric with feedback in Gujarati (English kept for technical terms), tracks your
-recurring strengths and weaknesses across evaluations, and answers follow-up
-questions.
+Vimarsh reads a handwritten UPSC/GPSC mains answer or essay in Gujarati or English, then gives a score and practical suggestions. You can use it in a normal **ChatGPT or Claude chat on a browser or phone**. No coding, terminal, API key, or special installation is needed for that route.
 
-It runs entirely through your own **Claude subscription** via Claude Code — no
-API key, nothing deployed. This is a leaner rebuild of the original Vimarsh web
-app as a skill + subagents.
+The score is practice feedback, not an official UPSC/GPSC mark. Clear photos or scans help the assistant read your writing accurately.
 
-## What's inside
+## Choose how to use it
 
-```
-.claude/
-├── skills/vimarsh/
-│   ├── SKILL.md                 # the orchestrator (routes + calls subagents)
-│   ├── rubrics/
-│   │   ├── answer-rubric.md     # mains-answer scoring (6 parameters)
-│   │   └── essay-rubric.md      # essay scoring (different 6 parameters)
-│   └── followup.md              # rules for follow-up Q&A
-└── agents/
-    ├── vimarsh-transcriber.md   # model: sonnet · reads the PDF/image
-    ├── vimarsh-researcher.md    # model: sonnet · web-searches references
-    └── vimarsh-evaluator.md     # model: opus   · scores against the rubric
-memory/
-├── answer-profile.md            # recurring patterns — answers
-└── essay-profile.md             # recurring patterns — essays
-runs/                            # per-evaluation artifacts (git-ignored)
-```
+| Option | Best for | Setup |
+| --- | --- | --- |
+| [One chat](#start-with-one-chat-easiest) | Trying Vimarsh now, including on a phone | Attach one instruction file and your answer |
+| [Reusable ChatGPT Project](#save-it-in-a-chatgpt-project) | Regular practice in ChatGPT | Set it up once, then start new chats inside the Project |
+| [Reusable Claude Project](#save-it-in-a-claude-project) | Regular practice in Claude | Set it up once, then start new chats inside the Project |
+| [Claude Code or Codex](#developer-setup) | People who use coding assistants | Use the native skill files in this repository |
 
-**Per-step models** live in each subagent's frontmatter (`model:`). Change one
-line to swap a model — e.g. if you hit Opus limits on Pro, set the evaluator to
-`model: sonnet`.
+## Start with one chat (easiest)
 
-## Prerequisites
+These steps work in the ChatGPT or Claude website and mobile app.
 
-- [Claude Code](https://claude.com/claude-code) installed and signed in.
-- A **claude.ai subscription (Pro or Max)**. Works on Pro; the evaluator uses
-  Opus, which Pro allows within its usage limits — see "Model notes" below.
+1. Save [vimarsh-chat-instructions.md](chat/vimarsh-chat-instructions.md) to your phone or computer. If you are viewing it on GitHub, open the file and use its **Download raw file** option. You can also copy all its text if saving a file is difficult.
+2. Open a **new chat** in [ChatGPT](https://chatgpt.com/) or [Claude](https://claude.ai/).
+3. Tap or click the **+ / paperclip** beside the message box. Attach `vimarsh-chat-instructions.md` and clear photos or a PDF of **all pages** of your answer or essay. If you copied the instructions instead, paste them into the chat, then attach your answer.
+4. Send this message (change the choices if you wish):
 
-## How to use it (recommended: run from this folder)
+   > Follow the attached Vimarsh instructions. This is a mains answer. Research the topic on the web. Give feedback in Gujarati with English technical terms. Please ask if you cannot read any page.
 
-1. Open a terminal in this folder:
-   ```bash
-   cd vimarsh-skill
-   claude
-   ```
-2. Point Claude at your answer/essay, e.g.:
-   > Evaluate this answer: answer.pdf
+   For an essay, change “mains answer” to “essay.” If you do not want web research, say “Evaluate only what I wrote.” You can ask for Gujarati-only or English feedback.
 
-   **Tip:** put the PDF/image inside this folder first (e.g. drop it in the
-   project root or an `inputs/` subfolder) and refer to it by that path. Claude
-   Code sandboxes file access to the folder you launched it from, so a file
-   sitting elsewhere may be blocked or prompt for approval.
+5. Check that the assistant read **every page** and identified the question or essay topic correctly. If it missed a page or a word, send a clearer photo or type the missing text before accepting the score.
 
-   (or just say **"use the vimarsh skill"**). The skill triggers and asks you
-   three questions:
-   - **Answer or Essay?**
-   - **Web research, or just evaluate what's written?**
-   - **Feedback language?** (Gujarati + English terms / Gujarati only / English)
-3. It transcribes (a multi-page handwritten scan takes a few minutes), then
-   researches (if chosen), then shows a scored evaluation.
-4. Ask follow-up questions right in the same session ("why did I lose marks on
-   structure?"). To grade another piece, just point it at the next file.
+You can ask follow-up questions in the **same chat**, such as “Why did I lose marks for structure?” For a fresh chat, attach the instruction file again. To carry your progress forward, copy the **Memory update** lines from the previous evaluation into the new chat; chat history alone is not a guaranteed record of those strengths and weaknesses.
 
-Artifacts for each run are saved under `runs/<timestamp>/` (transcript,
-references, evaluation). Your recurring patterns accumulate in `memory/`.
+If the app does not offer web search or file upload on your account, ask for feedback without research or paste a typed version of the answer. The assistant should say when it cannot read a page or verify a fact.
 
-### Do I need this "project", or can I install it globally?
+## Save it in a ChatGPT Project
 
-Both work — this folder is the **portable, self-contained** option, which is why
-it's the recommended one (especially for sharing):
+A Project keeps the instructions and rubric available for future chats. [ChatGPT’s Project guide](https://help.openai.com/en/articles/10169521-projects-in-chatgpt) explains the current menus and account availability.
 
-- **As a project (recommended):** keep the folder, run `claude` inside it. The
-  skill, subagents, rubrics, and memory are all local to the folder — nothing
-  else to set up, and memory stays with the project.
-- **Globally (advanced):** copy `.claude/skills/vimarsh` → `~/.claude/skills/`
-  and the three files in `.claude/agents/` → `~/.claude/agents/`. Then the skill
-  is available in every Claude Code session. Caveat: the SKILL.md uses paths
-  relative to the project root for the rubrics and `memory/`, so for a global
-  install you'd need to adjust those paths (or still run from a folder that has
-  a `memory/` dir). For most people the project approach is simpler.
+1. Save both [vimarsh-chat-instructions.md](chat/vimarsh-chat-instructions.md) and [reusable-assistant-instructions.txt](chat/reusable-assistant-instructions.txt).
+2. In ChatGPT, open the sidebar and choose **New project**. Name it “Vimarsh.”
+3. In the Project, add `vimarsh-chat-instructions.md` as a **project file/source**. Open the Project's **••• → Project settings** and paste the text from `reusable-assistant-instructions.txt` into **Project instructions**.
+4. Start each evaluation as a **new chat inside that Project**. Attach your answer pages and say whether it is an answer or essay, whether you want web research, and which feedback language you prefer.
 
-## Sharing it with someone else (they have Claude Pro)
+On a phone, use the ChatGPT app or `chatgpt.com` in your browser. Menu labels may vary slightly by device. If Project setup is unavailable in your app, set it up in a browser, then use the Project in the app. Copy the **Memory update** into the next chat when you want the evaluator to consider your earlier pattern; Project memory and plan settings can affect what past chats it sees.
 
-1. **Reset memory first if you've used it** — `memory/answer-profile.md` and
-   `memory/essay-profile.md` hold *your* strengths/weaknesses. Replace their
-   contents with the `_No evaluations yet._` seed before sharing so they start
-   clean. (`runs/` is git-ignored and won't be shared.)
-2. Send them the whole `vimarsh-skill` folder — zip it, or push it to a git repo
-   and have them clone it.
-3. They just need Claude Code installed and signed in with their Pro account,
-   then `cd` into the folder and run `claude` (same as above). No API key, no
-   extra setup.
+**Optional custom GPT:** If your ChatGPT Business, Enterprise, or Edu workspace allows new GPTs, create one on the **web**, paste `reusable-assistant-instructions.txt` into its **Instructions**, and upload `vimarsh-chat-instructions.md` as **Knowledge**. Enable web search if offered, then test it with a sample answer. You can use an existing GPT on mobile, but [new GPT creation is currently unavailable on personal accounts and in mobile apps](https://help.openai.com/en/articles/8554397-creating-and-editing-gpts).
 
-## Model notes
+## Save it in a Claude Project
 
-- Defaults: transcribe = `sonnet`, research = `sonnet`, evaluate = `opus`.
-- On **Pro**, Opus is available but has tighter usage limits than Max. If your
-  friend evaluates many pieces and hits Opus limits, set
-  `.claude/agents/vimarsh-evaluator.md` → `model: sonnet`. Quality drops a
-  little; reliability and limits improve.
+[Claude Projects](https://support.claude.com/en/articles/9519177-how-can-i-create-and-manage-projects) let you reuse instructions and files across chats. Current Claude guidance says free accounts can create a limited number of Projects.
 
-## What changed vs the original web app
+1. Save both [vimarsh-chat-instructions.md](chat/vimarsh-chat-instructions.md) and [reusable-assistant-instructions.txt](chat/reusable-assistant-instructions.txt).
+2. Open **Projects** in Claude and choose **New Project**. Name it “Vimarsh.”
+3. Add `vimarsh-chat-instructions.md` to **Project knowledge**. Choose **Set project instructions** and paste the text from `reusable-assistant-instructions.txt`; save it.
+4. Start each evaluation as a **new chat inside that Project** and attach your answer pages. Tell Claude whether it is an answer or essay, whether to research, and the feedback language.
 
-- No web UI / sidebar / progress bar — you live in Claude Code; history is your
-  sessions plus the `runs/` and `memory/` files.
-- Memory is plain editable markdown instead of SQLite, split into answer vs
-  essay profiles.
-- Adds a dedicated **essay** rubric (the web app only did answers).
-- Fixes the transcription reliability issue from the SDK path — this uses Claude
-  Code's native file reading directly.
+You can open Claude in its mobile app or phone browser for evaluations. If you cannot find the Project setup controls on your phone, do the one-time setup at `claude.ai/projects` in a browser. Claude says separate Project chats do not share all their context automatically, so paste your previous **Memory update** into the next chat if you want it used.
+
+## Developer setup
+
+This repository also contains native skill files for [Claude Code](https://claude.com/claude-code) in `.claude/skills/vimarsh/` and for Codex in `.agents/skills/vimarsh/`, with their respective agent definitions. Those versions can use local files, separate transcription/research/evaluation agents, `runs/` artifacts, and local `memory/` profiles. The chat version above handles the same evaluation within one conversation and gives you a copyable Memory update.
+
+For Claude Code, open a terminal in this repository, run `claude`, then ask “Use the vimarsh skill to evaluate `answer.pdf`.” For Codex, open this repository as the workspace and ask the same. Place the PDF or images inside the workspace or attach them in the app.
+
+The rubrics are in `.claude/skills/vimarsh/rubrics/` and `.agents/skills/vimarsh/rubrics/`. The browser/mobile instruction file contains both rubrics, so readers using ordinary ChatGPT or Claude do not need to open these folders.
